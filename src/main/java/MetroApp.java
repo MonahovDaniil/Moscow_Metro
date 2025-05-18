@@ -2,7 +2,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -20,7 +19,6 @@ public class MetroApp extends Application {
     private ComboBox<Station> startStationCombo;
     private ComboBox<Station> endStationCombo;
     private ListView<Route> routesList;
-    private TextArea routeDetailsArea;
     private Label routeSummaryLabel;
     private MetroMap metroMap;
     private Map<Integer, Station> stationMap;
@@ -277,98 +275,7 @@ private String formatRoute(Route route, int index) {
         Platform.exit();
     }
 
-    /**
-     * Formats route information with transfers and travel time
-     * @param route The route to format
-     * @return Formatted route information as text
-     */
-    private String formatRouteDetails(Route route) {
-        if (route == null) {
-            return "";
-        }
 
-        List<Station> stations = route.getStations();
-        int totalTime = route.getTotalTime();
-
-        // Format total time in minutes and seconds
-        long minutes = TimeUnit.SECONDS.toMinutes(totalTime);
-        long seconds = totalTime - TimeUnit.MINUTES.toSeconds(minutes);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Маршрут от ").append(stations.get(0).getName())
-          .append(" до ").append(stations.get(stations.size() - 1).getName())
-          .append("\n\nОбщее время в пути: ");
-
-        if (minutes > 0) {
-            sb.append(minutes).append(" мин ");
-        }
-        sb.append(seconds).append(" сек\n\n");
-
-        sb.append("Станции:\n");
-
-        // Track the current line to detect transfers
-        int currentLineId = stations.get(0).getLineId();
-
-        for (int i = 0; i < stations.size(); i++) {
-            Station station = stations.get(i);
-
-            // Check if this is a transfer (line changed)
-            if (station.getLineId() != currentLineId) {
-                sb.append("\n--- Пересадка на ").append(station.getLine()).append(" линию ---\n\n");
-                currentLineId = station.getLineId();
-            }
-
-            sb.append(i + 1).append(". ").append(station.getName());
-
-            // Add travel time to next station if not the last station
-            if (i < stations.size() - 1) {
-                // Find connection to get travel time
-                Station nextStation = stations.get(i + 1);
-                int travelTime = getTravelTimeBetweenStations(station, nextStation);
-                if (travelTime > 0) {
-                    sb.append(" (").append(travelTime).append(" сек)");
-                }
-            }
-
-            sb.append("\n");
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Formats a simple route summary in the format:
-     * "StartStation (Line) - EndStation (Line) Время в пути - X минут"
-     * @param route The route to format
-     * @return Formatted route summary
-     */
-    private String formatRouteSummary(Route route) {
-        if (route == null) {
-            return "Выберите маршрут";
-        }
-
-        List<Station> stations = route.getStations();
-        if (stations.isEmpty()) {
-            return "Маршрут не найден";
-        }
-
-        Station startStation = stations.get(0);
-        Station endStation = stations.get(stations.size() - 1);
-        int totalTime = route.getTotalTime();
-
-        // Convert seconds to minutes, rounding up if there are remaining seconds
-        long minutes = TimeUnit.SECONDS.toMinutes(totalTime);
-        if (totalTime % 60 > 0) {
-            minutes++; // Round up if there are remaining seconds
-        }
-
-        return String.format("%s (%s) - %s (%s)\nВремя в пути - %d минут", 
-                startStation.getName(), 
-                startStation.getLine(), 
-                endStation.getName(), 
-                endStation.getLine(),
-                minutes);
-    }
 
     /**
      * Gets the travel time between two stations
@@ -393,9 +300,6 @@ private String formatRoute(Route route, int index) {
         return 0;
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
 
     /**
      * Finds a station by its name

@@ -4,7 +4,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
